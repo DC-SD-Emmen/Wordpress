@@ -8,7 +8,7 @@ services:
       MYSQL_DATABASE: MySQLDatabaseName
       MYSQL_USER: MySQLUsername
       MYSQL_PASSWORD: MySQLUserPassword
-
+ 
   wordpress:
     depends_on:
       - db
@@ -18,12 +18,12 @@ services:
       - "80:80"
     environment:
       WORDPRESS_DB_HOST: db:3306
-      WORDPRESS_DB_USER: mysql
-      WORDPRESS_DB_PASSWORD: root
-      WORDPRESS_DB_NAME: root
+      WORDPRESS_DB_USER: MySQLUsername           # ✅ Match MYSQL_USER
+      WORDPRESS_DB_PASSWORD: MySQLUserPassword   # ✅ Match MYSQL_PASSWORD
+      WORDPRESS_DB_NAME: MySQLDatabaseName       # ✅ Match MYSQL_DATABASE
     volumes:
       - "./:/var/www/html"
-
+ 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
     restart: always
@@ -31,8 +31,8 @@ services:
       - "8080:80"
     environment:
       PMA_HOST: db
-      PMA_USER: mysql
-      PMA_PASSWORD: root
-
+      PMA_USER: root                             # ✅ Use root or MySQLUsername
+      PMA_PASSWORD: MySQLRootPassword            # ✅ Use the correct password for that user
+ 
 volumes:
   mysql: {}
