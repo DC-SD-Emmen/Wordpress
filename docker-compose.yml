@@ -1,4 +1,5 @@
-version: "3" 
+version: "3"
+
 services:
   db:
     image: mysql:latest
@@ -8,7 +9,9 @@ services:
       MYSQL_DATABASE: MySQLDatabaseName
       MYSQL_USER: MySQLUsername
       MYSQL_PASSWORD: MySQLUserPassword
- 
+    volumes:
+      - mysql_data:/var/lib/mysql
+
   wordpress:
     depends_on:
       - db
@@ -18,12 +21,21 @@ services:
       - "80:80"
     environment:
       WORDPRESS_DB_HOST: db:3306
-      WORDPRESS_DB_USER: MySQLUsername           # ✅ Match MYSQL_USER
-      WORDPRESS_DB_PASSWORD: MySQLUserPassword   # ✅ Match MYSQL_PASSWORD
-      WORDPRESS_DB_NAME: MySQLDatabaseName       # ✅ Match MYSQL_DATABASE
+      WORDPRESS_DB_USER: MySQLUsername
+      WORDPRESS_DB_PASSWORD: MySQLUserPassword
+      WORDPRESS_DB_NAME: MySQLDatabaseName
     volumes:
-      - "./:/var/www/html"
- 
+      - ./wordpress:/var/www/html
+    command: >
+      sh -c "
+        chown -R www-data:www-data /var/www/html &&
+        chmod -R 755 /var/www/html &&
+        if [ -f /var/www/html/wp-config.php ] && ! grep -q 'FS_METHOD' /var/www/html/wp-config.php; then
+          echo \"define('FS_METHOD', 'direct');\" >> /var/www/html/wp-config.php;
+        fi &&
+        docker-entrypoint.sh apache2-foreground
+      "
+
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
     restart: always
@@ -31,8 +43,8 @@ services:
       - "8080:80"
     environment:
       PMA_HOST: db
-      PMA_USER: root                             # ✅ Use root or MySQLUsername
-      PMA_PASSWORD: MySQLRootPassword            # ✅ Use the correct password for that user
- 
+      PMA_USER: root
+      PMA_PASSWORD: MySQLRootPassword
+
 volumes:
-  mysql: {}
+  mysql_data:
