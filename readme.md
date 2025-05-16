@@ -44,4 +44,5 @@ To stop the project or reset it completely:
 
 To remove everything (including the wordpress folder and database volume):
 
-- docker-compose down -v
+  ```bash
+  docker-compose down -v
